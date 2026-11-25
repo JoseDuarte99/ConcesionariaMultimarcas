@@ -1,5 +1,7 @@
 package negocio.modelo;
 
+import negocio.excepciones.DatoVehiculoInvalidoException;
+
 /**
  * Motocicleta.
  *
@@ -22,11 +24,14 @@ public class Motocicleta extends Vehiculo {
      * @param kilometraje     kilómetros recorridos
      * @param valorComercial  valor comercial estimado
      * @param estilo          estilo de la motocicleta
+     * @throws DatoVehiculoInvalidoException si algún dato común o el estilo son inválidos
      */
     public Motocicleta(String identificador, String marca, String modelo, int anio,
                        String color, CondicionVehiculo condicion, int kilometraje,
-                       double valorComercial, EstiloMotocicleta estilo) {
+                       double valorComercial, EstiloMotocicleta estilo)
+            throws DatoVehiculoInvalidoException {
         super(identificador, marca, modelo, anio, color, condicion, kilometraje, valorComercial);
+        validarNoNulo(estilo, "estilo");
         this.estilo = estilo;
     }
 
@@ -43,8 +48,10 @@ public class Motocicleta extends Vehiculo {
      * Asigna el estilo de la motocicleta.
      *
      * @param estilo nuevo estilo
+     * @throws DatoVehiculoInvalidoException si el estilo es nulo
      */
-    public void setEstilo(EstiloMotocicleta estilo) {
+    public void setEstilo(EstiloMotocicleta estilo) throws DatoVehiculoInvalidoException {
+        validarNoNulo(estilo, "estilo");
         this.estilo = estilo;
     }
 

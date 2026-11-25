@@ -1,5 +1,7 @@
 package negocio.modelo;
 
+import negocio.excepciones.DatoVehiculoInvalidoException;
+
 /**
  * Representación abstracta de un vehículo del stock de la concesionaria.
  *
@@ -17,9 +19,9 @@ package negocio.modelo;
  * servirá de clave de igualdad en la Issue #4.</p>
  *
  * <p>Las invariantes de dominio (kilometraje coherente con la condición,
- * valores no negativos, identificador no vacío, etc.) se validan en los
- * mutadores y se implementan en la Issue #3 mediante excepciones propias del
- * dominio.</p>
+ * valores no negativos, identificador no vacío, etc.) se validan en el
+ * constructor y en los mutadores. Un estado inválido se informa lanzando
+ * {@link DatoVehiculoInvalidoException}, nunca con un valor centinela.</p>
  */
 public abstract class Vehiculo implements Cotizable {
 
@@ -45,10 +47,20 @@ public abstract class Vehiculo implements Cotizable {
      * @param condicion       condición comercial (nuevo/usado)
      * @param kilometraje     kilómetros recorridos
      * @param valorComercial  valor comercial estimado
+     * @throws DatoVehiculoInvalidoException si alguno de los datos viola una invariante del dominio
      */
     protected Vehiculo(String identificador, String marca, String modelo, int anio,
                        String color, CondicionVehiculo condicion, int kilometraje,
-                       double valorComercial) {
+                       double valorComercial) throws DatoVehiculoInvalidoException {
+        validarTextoNoVacio(identificador, "identificador");
+        validarTextoNoVacio(marca, "marca");
+        validarTextoNoVacio(modelo, "modelo");
+        validarAnio(anio);
+        validarTextoNoVacio(color, "color");
+        validarCondicion(condicion);
+        validarKilometraje(condicion, kilometraje);
+        validarValorComercial(valorComercial);
+
         this.identificador = identificador;
         this.marca = marca;
         this.modelo = modelo;
@@ -81,8 +93,10 @@ public abstract class Vehiculo implements Cotizable {
      * Asigna la marca comercial.
      *
      * @param marca nueva marca
+     * @throws DatoVehiculoInvalidoException si la marca es nula o está vacía
      */
-    public void setMarca(String marca) {
+    public void setMarca(String marca) throws DatoVehiculoInvalidoException {
+        validarTextoNoVacio(marca, "marca");
         this.marca = marca;
     }
 
@@ -99,8 +113,10 @@ public abstract class Vehiculo implements Cotizable {
      * Asigna el modelo comercial.
      *
      * @param modelo nuevo modelo
+     * @throws DatoVehiculoInvalidoException si el modelo es nulo o está vacío
      */
-    public void setModelo(String modelo) {
+    public void setModelo(String modelo) throws DatoVehiculoInvalidoException {
+        validarTextoNoVacio(modelo, "modelo");
         this.modelo = modelo;
     }
 
@@ -117,8 +133,10 @@ public abstract class Vehiculo implements Cotizable {
      * Asigna el año de fabricación.
      *
      * @param anio nuevo año
+     * @throws DatoVehiculoInvalidoException si el año no es positivo
      */
-    public void setAnio(int anio) {
+    public void setAnio(int anio) throws DatoVehiculoInvalidoException {
+        validarAnio(anio);
         this.anio = anio;
     }
 
@@ -135,8 +153,10 @@ public abstract class Vehiculo implements Cotizable {
      * Asigna el color de la unidad.
      *
      * @param color nuevo color
+     * @throws DatoVehiculoInvalidoException si el color es nulo o está vacío
      */
-    public void setColor(String color) {
+    public void setColor(String color) throws DatoVehiculoInvalidoException {
+        validarTextoNoVacio(color, "color");
         this.color = color;
     }
 
@@ -152,9 +172,15 @@ public abstract class Vehiculo implements Cotizable {
     /**
      * Asigna la condición comercial.
      *
+     * <p>Si la condición cambia, se revalida el kilometraje actual para no
+     * dejar una unidad NUEVO con kilómetros o una USADO sin ellos.</p>
+     *
      * @param condicion nueva condición
+     * @throws DatoVehiculoInvalidoException si la condición es nula o el kilometraje actual es incompatible
      */
-    public void setCondicion(CondicionVehiculo condicion) {
+    public void setCondicion(CondicionVehiculo condicion) throws DatoVehiculoInvalidoException {
+        validarCondicion(condicion);
+        validarKilometraje(condicion, this.kilometraje);
         this.condicion = condicion;
     }
 
@@ -171,8 +197,10 @@ public abstract class Vehiculo implements Cotizable {
      * Asigna los kilómetros recorridos.
      *
      * @param kilometraje nuevo kilometraje
+     * @throws DatoVehiculoInvalidoException si es negativo o incompatible con la condición actual
      */
-    public void setKilometraje(int kilometraje) {
+    public void setKilometraje(int kilometraje) throws DatoVehiculoInvalidoException {
+        validarKilometraje(this.condicion, kilometraje);
         this.kilometraje = kilometraje;
     }
 
@@ -189,8 +217,10 @@ public abstract class Vehiculo implements Cotizable {
      * Asigna el valor comercial estimado.
      *
      * @param valorComercial nuevo valor comercial
+     * @throws DatoVehiculoInvalidoException si es negativo, NaN o infinito
      */
-    public void setValorComercial(double valorComercial) {
+    public void setValorComercial(double valorComercial) throws DatoVehiculoInvalidoException {
+        validarValorComercial(valorComercial);
         this.valorComercial = valorComercial;
     }
 
@@ -213,5 +243,100 @@ public abstract class Vehiculo implements Cotizable {
     @Override
     public double calcularValorComercial() {
         return valorComercial;
+    }
+
+    /**
+     * Verifica que un dato obligatorio no sea nulo.
+     *
+     * @param valor       dato a validar
+     * @param nombreCampo nombre del campo, usado en el mensaje de error
+     * @throws DatoVehiculoInvalidoException si el dato es nulo
+     */
+    protected static void validarNoNulo(Object valor, String nombreCampo)
+            throws DatoVehiculoInvalidoException {
+        if (valor == null) {
+            throw new DatoVehiculoInvalidoException(
+                    "El campo " + nombreCampo + " es obligatorio.");
+        }
+    }
+
+    /**
+     * Verifica que un campo de texto tenga contenido significativo.
+     *
+     * @param valor       texto a validar
+     * @param nombreCampo nombre del campo, usado en el mensaje de error
+     * @throws DatoVehiculoInvalidoException si el texto es nulo o solo contiene espacios
+     */
+    private static void validarTextoNoVacio(String valor, String nombreCampo)
+            throws DatoVehiculoInvalidoException {
+        if (valor == null || valor.trim().isEmpty()) {
+            throw new DatoVehiculoInvalidoException(
+                    "El campo " + nombreCampo + " no puede estar vacío.");
+        }
+    }
+
+    /**
+     * Verifica que el año de fabricación sea positivo.
+     *
+     * @param anio año a validar
+     * @throws DatoVehiculoInvalidoException si el año no es positivo
+     */
+    private static void validarAnio(int anio) throws DatoVehiculoInvalidoException {
+        if (anio <= 0) {
+            throw new DatoVehiculoInvalidoException("El año de fabricación debe ser positivo.");
+        }
+    }
+
+    /**
+     * Verifica que la condición comercial esté presente.
+     *
+     * @param condicion condición a validar
+     * @throws DatoVehiculoInvalidoException si la condición es nula
+     */
+    private static void validarCondicion(CondicionVehiculo condicion)
+            throws DatoVehiculoInvalidoException {
+        if (condicion == null) {
+            throw new DatoVehiculoInvalidoException("La condición del vehículo es obligatoria.");
+        }
+    }
+
+    /**
+     * Verifica la coherencia entre condición y kilometraje.
+     *
+     * <p>Una unidad NUEVO debe tener exactamente 0 km; una USADO debe tener
+     * kilometraje mayor que cero.</p>
+     *
+     * @param condicion   condición comercial vigente
+     * @param kilometraje kilómetros a validar
+     * @throws DatoVehiculoInvalidoException si el kilometraje es negativo o no coincide con la condición
+     */
+    private static void validarKilometraje(CondicionVehiculo condicion, int kilometraje)
+            throws DatoVehiculoInvalidoException {
+        if (kilometraje < 0) {
+            throw new DatoVehiculoInvalidoException("El kilometraje no puede ser negativo.");
+        }
+        if (condicion == CondicionVehiculo.NUEVO && kilometraje != 0) {
+            throw new DatoVehiculoInvalidoException(
+                    "Un vehículo NUEVO no puede tener kilometraje mayor que cero.");
+        }
+        if (condicion == CondicionVehiculo.USADO && kilometraje == 0) {
+            throw new DatoVehiculoInvalidoException(
+                    "Un vehículo USADO debe tener kilometraje mayor que cero.");
+        }
+    }
+
+    /**
+     * Verifica que el valor comercial sea un número finito y no negativo.
+     *
+     * @param valorComercial valor a validar
+     * @throws DatoVehiculoInvalidoException si es negativo, NaN o infinito
+     */
+    private static void validarValorComercial(double valorComercial)
+            throws DatoVehiculoInvalidoException {
+        if (Double.isNaN(valorComercial) || Double.isInfinite(valorComercial)
+                || valorComercial < 0) {
+            throw new DatoVehiculoInvalidoException(
+                    "El valor comercial debe ser un número finito mayor o igual que cero.");
+        }
     }
 }

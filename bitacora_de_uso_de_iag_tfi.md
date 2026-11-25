@@ -2,9 +2,14 @@
 
 * **Institución:** Universidad Tecnológica Nacional – Facultad Regional Resistencia (UTN FRRe)
 * **Carrera y Cátedra:** Tecnicatura Universitaria en Programación – Programación II (Año 2026)
-* **Comisión:** [ ] Comisión 2 / [ ] Comisión 3
-* **Alumno/a:** *(Completar con tu nombre y apellido)*
-* **Legajo N°:** *(Completar con tu número de legajo)*
+* **Comisión:** [ ] Comisión 3
+
+### Integrantes:
+* **Alumno/a:** *Luque Antonella Desiree *
+* **Legajo N°:** * --- *
+* **Alumno/a:** *Duarte Jose Esteban*
+* **Legajo N°:** *26216*
+
 * **Proyecto:** Trabajo Final Integrador – Sistema de Gestión de Concesionaria Multimarcas en Java
 * **IAG Seleccionada:** OpenCode Desktop (conectado al LLM gratuito: DeepSeek V4.1 Flash)
 * **Alternativas gratuitas contempladas:** otros modelos de acceso gratuito disponibles a través de OpenCode y Google Gemini mediante una API key gratuita de Google AI Studio (acceso estudiante).
@@ -35,6 +40,13 @@ Para la resolución del proyecto se seleccionó **OpenCode** en su modalidad de 
 *(Completar durante las Fases 1 a 5 con al menos un fallo real detectado en las respuestas de OpenCode: alucinaciones de código, violación de la separación Diseño vs. Negocio, errores en `equals()`/`hashCode()` o sesgos conceptuales).*
 
 ### Caso 1: *(Título breve del fallo detectado)*
+* **Fase del Plan TFI:** *(Ej. Fase 1 - Configuración de contexto / Fase 2 - Dominio)*
+* **Prompt / Contexto utilizado:** *(Transcribir brevemente qué se le pidió a OpenCode)*
+* **Inexactitud o error propuesto por la IAG:** *(Describir o pegar el fragmento erróneo)*
+* **Auditoría y resolución aplicada:** *(Explicar cómo lo detectaste y cómo lo corregiste según lo visto en clase)*
+
+
+### Caso 2: *(Título breve del fallo detectado)*
 * **Fase del Plan TFI:** *(Ej. Fase 1 - Configuración de contexto / Fase 2 - Dominio)*
 * **Prompt / Contexto utilizado:** *(Transcribir brevemente qué se le pidió a OpenCode)*
 * **Inexactitud o error propuesto por la IAG:** *(Describir o pegar el fragmento erróneo)*

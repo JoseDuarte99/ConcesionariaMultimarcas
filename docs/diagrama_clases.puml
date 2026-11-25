@@ -1,0 +1,106 @@
+@startuml
+skinparam classAttributeIconSize 0
+skinparam defaultFontName Monospaced
+
+title Jerarquía de Vehículos - Concesionaria Multimarcas
+
+interface Cotizable {
+  + calcularValorComercial() : double
+}
+
+abstract class Vehiculo {
+  - identificador : String {final}
+  - marca : String
+  - modelo : String
+  - anio : int
+  - color : String
+  - condicion : CondicionVehiculo
+  - kilometraje : int
+  - valorComercial : double
+  + getIdentificador() : String
+  + getMarca() : String
+  + setMarca(marca : String) : void
+  + getModelo() : String
+  + setModelo(modelo : String) : void
+  + getAnio() : int
+  + setAnio(anio : int) : void
+  + getColor() : String
+  + setColor(color : String) : void
+  + getCondicion() : CondicionVehiculo
+  + setCondicion(condicion : CondicionVehiculo) : void
+  + getKilometraje() : int
+  + setKilometraje(kilometraje : int) : void
+  + getValorComercial() : double
+  + setValorComercial(valorComercial : double) : void
+  + {abstract} getTipoVehiculo() : TipoVehiculo
+  + calcularValorComercial() : double
+}
+
+class Auto {
+  - carroceria : Carroceria
+  + getCarroceria() : Carroceria
+  + setCarroceria(carroceria : Carroceria) : void
+  + getTipoVehiculo() : TipoVehiculo
+}
+
+class Camioneta {
+  - carroceria : Carroceria
+  + getCarroceria() : Carroceria
+  + setCarroceria(carroceria : Carroceria) : void
+  + getTipoVehiculo() : TipoVehiculo
+}
+
+class Motocicleta {
+  - estilo : EstiloMotocicleta
+  + getEstilo() : EstiloMotocicleta
+  + setEstilo(estilo : EstiloMotocicleta) : void
+  + getTipoVehiculo() : TipoVehiculo
+}
+
+enum TipoVehiculo {
+  AUTO
+  CAMIONETA
+  MOTOCICLETA
+}
+
+enum CondicionVehiculo {
+  NUEVO
+  USADO
+}
+
+enum Carroceria {
+  SEDAN
+  HATCHBACK
+  SUV
+  COUPE
+  PICKUP
+  FURGON
+}
+
+enum EstiloMotocicleta {
+  DEPORTIVA
+  CRUISER
+  SCOOTER
+  ENDURO
+  NAKED
+  TOURING
+}
+
+Vehiculo ..|> Cotizable
+Auto --|> Vehiculo
+Camioneta --|> Vehiculo
+Motocicleta --|> Vehiculo
+
+Vehiculo --> CondicionVehiculo : condicion
+Vehiculo --> TipoVehiculo : getTipoVehiculo()
+Auto --> Carroceria : carroceria
+Camioneta --> Carroceria : carroceria
+Motocicleta --> EstiloMotocicleta : estilo
+
+note right of Vehiculo
+  identificador es inmutable (final, sin setter).
+  Invariantes de dominio se validan en #3.
+  equals / hashCode / toString en #4.
+end note
+
+@enduml

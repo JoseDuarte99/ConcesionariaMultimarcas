@@ -3748,7 +3748,3 @@ public int contarStock() {
     },
   ],
 };
-  ],
-  ejes: [],
-  glosario: [],
-};

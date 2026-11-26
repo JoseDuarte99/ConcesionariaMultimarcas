@@ -1,5 +1,7 @@
 package negocio.modelo;
 
+import negocio.excepciones.DatoVehiculoInvalidoException;
+
 /**
  * Automóvil de pasajeros.
  *
@@ -22,11 +24,14 @@ public class Auto extends Vehiculo {
      * @param kilometraje     kilómetros recorridos
      * @param valorComercial  valor comercial estimado
      * @param carroceria      tipo de carrocería del automóvil
+     * @throws DatoVehiculoInvalidoException si algún dato común o la carrocería son inválidos
      */
     public Auto(String identificador, String marca, String modelo, int anio,
                 String color, CondicionVehiculo condicion, int kilometraje,
-                double valorComercial, Carroceria carroceria) {
+                double valorComercial, Carroceria carroceria)
+            throws DatoVehiculoInvalidoException {
         super(identificador, marca, modelo, anio, color, condicion, kilometraje, valorComercial);
+        validarNoNulo(carroceria, "carroceria");
         this.carroceria = carroceria;
     }
 
@@ -43,8 +48,10 @@ public class Auto extends Vehiculo {
      * Asigna el tipo de carrocería.
      *
      * @param carroceria nueva carrocería
+     * @throws DatoVehiculoInvalidoException si la carrocería es nula
      */
-    public void setCarroceria(Carroceria carroceria) {
+    public void setCarroceria(Carroceria carroceria) throws DatoVehiculoInvalidoException {
+        validarNoNulo(carroceria, "carroceria");
         this.carroceria = carroceria;
     }
 

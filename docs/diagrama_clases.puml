@@ -86,6 +86,21 @@ enum EstiloMotocicleta {
   TOURING
 }
 
+class DatoVehiculoInvalidoException <<Exception>> {
+  + DatoVehiculoInvalidoException(mensaje : String)
+  + DatoVehiculoInvalidoException(mensaje : String, causa : Throwable)
+}
+
+class VehiculoNoEncontradoException <<Exception>> {
+  + VehiculoNoEncontradoException(mensaje : String)
+  + VehiculoNoEncontradoException(mensaje : String, causa : Throwable)
+}
+
+class VehiculoDuplicadoException <<Exception>> {
+  + VehiculoDuplicadoException(mensaje : String)
+  + VehiculoDuplicadoException(mensaje : String, causa : Throwable)
+}
+
 Vehiculo ..|> Cotizable
 Auto --|> Vehiculo
 Camioneta --|> Vehiculo
@@ -97,10 +112,27 @@ Auto --> Carroceria : carroceria
 Camioneta --> Carroceria : carroceria
 Motocicleta --> EstiloMotocicleta : estilo
 
+Vehiculo ..> DatoVehiculoInvalidoException : lanza
+Auto ..> DatoVehiculoInvalidoException : lanza
+Camioneta ..> DatoVehiculoInvalidoException : lanza
+Motocicleta ..> DatoVehiculoInvalidoException : lanza
+
 note right of Vehiculo
   identificador es inmutable (final, sin setter).
-  Invariantes de dominio se validan en #3.
+  Invariantes validadas en constructor y setters.
   equals / hashCode / toString en #4.
+end note
+
+note right of DatoVehiculoInvalidoException
+  Dato inválido en el modelo.
+end note
+
+note right of VehiculoNoEncontradoException
+  Uso previsto en servicio: búsqueda sin resultados.
+end note
+
+note right of VehiculoDuplicadoException
+  Uso previsto en servicio: alta con identidad repetida.
 end note
 
 @enduml

@@ -6,7 +6,7 @@
 
 ### Integrantes:
 * **Alumno/a:** *Luque Antonella Desiree *
-* **Legajo N°:** * --- *
+* **Legajo N°:** * 31175 *
 * **Alumno/a:** *Duarte Jose Esteban*
 * **Legajo N°:** *26216*
 

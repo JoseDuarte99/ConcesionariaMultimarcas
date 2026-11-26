@@ -56,6 +56,17 @@ public class Camioneta extends Vehiculo {
     }
 
     /**
+     * Devuelve la ficha técnica completa de la camioneta.
+     *
+     * @return representación legible de la camioneta
+     */
+    @Override
+    public String toString() {
+        return getTipoVehiculo() + "{" + descripcionComun()
+                + ", carroceria=" + carroceria + "}";
+    }
+
+    /**
      * Devuelve el tipo de vehículo correspondiente a esta subclase.
      *
      * @return {@link TipoVehiculo#CAMIONETA}

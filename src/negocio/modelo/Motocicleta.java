@@ -56,6 +56,17 @@ public class Motocicleta extends Vehiculo {
     }
 
     /**
+     * Devuelve la ficha técnica completa de la motocicleta.
+     *
+     * @return representación legible de la motocicleta
+     */
+    @Override
+    public String toString() {
+        return getTipoVehiculo() + "{" + descripcionComun()
+                + ", estilo=" + estilo + "}";
+    }
+
+    /**
      * Devuelve el tipo de vehículo correspondiente a esta subclase.
      *
      * @return {@link TipoVehiculo#MOTOCICLETA}

@@ -172,4 +172,34 @@ note right of RepositorioVehiculos
   Formato de texto documentado en VehiculoCodec.
 end note
 
+class ConcesionariaService {
+  - repositorio : RepositorioGenerico<Vehiculo, String>
+  - stock : List<Vehiculo>
+  - indice : Map<String, Vehiculo>
+  + ConcesionariaService()
+  + ConcesionariaService(repositorio : RepositorioGenerico<Vehiculo, String>)
+  + cargar() : void
+  + recargar() : void
+  + alta(vehiculo : Vehiculo) : void
+  + baja(id : String) : void
+  + buscarPorId(id : String) : Vehiculo
+  + listarTodos() : List<Vehiculo>
+  + modificarValorComercial(id : String, nuevoValor : double) : void
+  + modificarKilometraje(id : String, nuevoKm : int) : void
+  + filtrarPorMarca(marca : String) : List<Vehiculo>
+  + filtrarPorCondicion(condicion : CondicionVehiculo) : List<Vehiculo>
+  + filtrarPorTipo(tipo : TipoVehiculo) : List<Vehiculo>
+  + filtrarPorRangoPrecio(minimo : double, maximo : double) : List<Vehiculo>
+}
+
+interface RepositorioGenerico {
+  + guardar(entidad : T) : void
+  + buscarPorId(id : ID) : T
+  + listarTodos() : List<T>
+  + eliminar(id : ID) : void
+}
+
+ConcesionariaService --> RepositorioGenerico : repositorio
+ConcesionariaService --> Vehiculo : gestiona
+
 @enduml

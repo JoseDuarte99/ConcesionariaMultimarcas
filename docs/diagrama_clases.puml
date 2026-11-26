@@ -1,17 +1,27 @@
 @startuml
-skinparam classAttributeIconSize 0
-skinparam defaultFontName Monospaced
+top to bottom direction
+skinparam linetype ortho
+skinparam packageStyle rectangle
+skinparam class {
+  BackgroundColor #FEFECE
+  BorderColor #A80036
+  ArrowColor #A80036
+  HeaderBackgroundColor #FEFECE
+  FontName SansSerif
+  FontSize 12
+}
+skinparam stereotypeCBackgroundColor #ADD1B2
+skinparam stereotypeABackgroundColor #A9DCDF
+skinparam stereotypeIBackgroundColor #B4A7E5
+skinparam stereotypeEBbackgroundColor #EB937F
 
-title Diagrama de Clases - Sistema de Gestión de Concesionaria Multimarcas
-
-package "negocio.modelo" {
-
+package modelo {
   interface Cotizable {
     + calcularValorComercial() : double
   }
 
   abstract class Vehiculo {
-    - identificador : String {final}
+    - identificador : String
     - marca : String
     - modelo : String
     - anio : int
@@ -19,6 +29,7 @@ package "negocio.modelo" {
     - condicion : CondicionVehiculo
     - kilometraje : int
     - valorComercial : double
+    # Vehiculo(identificador : String, marca : String, modelo : String, anio : int, color : String, condicion : CondicionVehiculo, kilometraje : int, valorComercial : double)
     + getIdentificador() : String
     + getMarca() : String
     + setMarca(marca : String) : void
@@ -34,40 +45,45 @@ package "negocio.modelo" {
     + setKilometraje(kilometraje : int) : void
     + getValorComercial() : double
     + setValorComercial(valorComercial : double) : void
+    + equals(obj : Object) : boolean
+    + hashCode() : int
     + {abstract} getTipoVehiculo() : TipoVehiculo
     + calcularValorComercial() : double
+    # descripcionComun() : String
+    + toString() : String
+    # {static} validarNoNulo(valor : Object, nombreCampo : String) : void
+    - {static} validarTextoNoVacio(valor : String, nombreCampo : String) : void
+    - {static} validarAnio(anio : int) : void
+    - {static} validarCondicion(condicion : CondicionVehiculo) : void
+    - {static} validarKilometraje(condicion : CondicionVehiculo, kilometraje : int) : void
+    - {static} validarValorComercial(valorComercial : double) : void
   }
 
-  class Auto {
+  class Auto extends Vehiculo {
     - carroceria : Carroceria
+    + Auto(identificador : String, marca : String, modelo : String, anio : int, color : String, condicion : CondicionVehiculo, kilometraje : int, valorComercial : double, carroceria : Carroceria)
     + getCarroceria() : Carroceria
     + setCarroceria(carroceria : Carroceria) : void
+    + toString() : String
     + getTipoVehiculo() : TipoVehiculo
   }
 
-  class Camioneta {
+  class Camioneta extends Vehiculo {
     - carroceria : Carroceria
+    + Camioneta(identificador : String, marca : String, modelo : String, anio : int, color : String, condicion : CondicionVehiculo, kilometraje : int, valorComercial : double, carroceria : Carroceria)
     + getCarroceria() : Carroceria
     + setCarroceria(carroceria : Carroceria) : void
+    + toString() : String
     + getTipoVehiculo() : TipoVehiculo
   }
 
-  class Motocicleta {
+  class Motocicleta extends Vehiculo {
     - estilo : EstiloMotocicleta
+    + Motocicleta(identificador : String, marca : String, modelo : String, anio : int, color : String, condicion : CondicionVehiculo, kilometraje : int, valorComercial : double, estilo : EstiloMotocicleta)
     + getEstilo() : EstiloMotocicleta
     + setEstilo(estilo : EstiloMotocicleta) : void
+    + toString() : String
     + getTipoVehiculo() : TipoVehiculo
-  }
-
-  enum TipoVehiculo {
-    AUTO
-    CAMIONETA
-    MOTOCICLETA
-  }
-
-  enum CondicionVehiculo {
-    NUEVO
-    USADO
   }
 
   enum Carroceria {
@@ -79,6 +95,11 @@ package "negocio.modelo" {
     FURGON
   }
 
+  enum CondicionVehiculo {
+    NUEVO
+    USADO
+  }
+
   enum EstiloMotocicleta {
     DEPORTIVA
     CRUISER
@@ -87,29 +108,36 @@ package "negocio.modelo" {
     NAKED
     TOURING
   }
+
+  enum TipoVehiculo {
+    AUTO
+    CAMIONETA
+    MOTOCICLETA
+  }
 }
 
-package "negocio.excepciones" {
-
-  class DatoVehiculoInvalidoException <<Exception>> {
+package excepciones {
+  class DatoVehiculoInvalidoException extends Exception {
+    - {static} serialVersionUID : long
     + DatoVehiculoInvalidoException(mensaje : String)
     + DatoVehiculoInvalidoException(mensaje : String, causa : Throwable)
   }
 
-  class VehiculoNoEncontradoException <<Exception>> {
-    + VehiculoNoEncontradoException(mensaje : String)
-    + VehiculoNoEncontradoException(mensaje : String, causa : Throwable)
-  }
-
-  class VehiculoDuplicadoException <<Exception>> {
+  class VehiculoDuplicadoException extends Exception {
+    - {static} serialVersionUID : long
     + VehiculoDuplicadoException(mensaje : String)
     + VehiculoDuplicadoException(mensaje : String, causa : Throwable)
   }
+
+  class VehiculoNoEncontradoException extends Exception {
+    - {static} serialVersionUID : long
+    + VehiculoNoEncontradoException(mensaje : String)
+    + VehiculoNoEncontradoException(mensaje : String, causa : Throwable)
+  }
 }
 
-package "negocio.persistencia" {
-
-  interface "RepositorioGenerico<T, ID>" as RepositorioGenerico {
+package persistencia {
+  interface RepositorioGenerico<T, ID> {
     + guardar(entidad : T) : void
     + buscarPorId(id : ID) : T
     + listarTodos() : List<T>
@@ -117,8 +145,8 @@ package "negocio.persistencia" {
   }
 
   class RepositorioVehiculos {
+    - {static} RUTA_POR_DEFECTO : Path
     - archivo : Path
-    - {static} RUTA_POR_DEFECTO : Path {final}
     + RepositorioVehiculos()
     + RepositorioVehiculos(archivo : Path)
     + getArchivo() : Path
@@ -130,13 +158,15 @@ package "negocio.persistencia" {
     - escribirTodos(vehiculos : List<Vehiculo>) : void
   }
 
-  class VehiculoCodec <<package-private>> {
-    - {static} SEPARADOR : char {final}
-    - {static} ESCAPE : char {final}
-    - {static} CANTIDAD_CAMPOS : int {final}
+  class VehiculoCodec {
+    - {static} SEPARADOR : char
+    - {static} ESCAPE : char
+    - {static} CANTIDAD_CAMPOS : int
+    - VehiculoCodec()
     ~ {static} codificar(vehiculo : Vehiculo) : String
     ~ {static} decodificar(registro : String) : Vehiculo
     - {static} dividirCampos(registro : String) : String[]
+    - {static} escapar(valor : String) : String
     - {static} desescapar(campo : String) : String
     - {static} parsearEntero(campo : String, nombre : String) : int
     - {static} parsearDecimal(campo : String, nombre : String) : double
@@ -144,8 +174,7 @@ package "negocio.persistencia" {
   }
 }
 
-package "negocio.servicio" {
-
+package servicio {
   class ConcesionariaService {
     - repositorio : RepositorioGenerico<Vehiculo, String>
     - stock : List<Vehiculo>
@@ -167,24 +196,7 @@ package "negocio.servicio" {
   }
 }
 
-package "diseno" {
-
-  class Main {
-    - servicio : ConcesionariaService
-    - entrada : EntradaConsola
-    - formularios : FormulariosVehiculo
-    + {static} main(args : String[]) : void
-    - ejecutar() : void
-    - mostrarMenu() : void
-    - procesarOpcion(opcion : int) : boolean
-    - darDeAlta() : void
-    - solicitarVehiculo(tipo : int) : Vehiculo
-    - modificar() : void
-    - consultar() : void
-    - bajar() : void
-    - mostrarListado(vehiculos : List<Vehiculo>) : void
-  }
-
+package diseno {
   class EntradaConsola {
     - lector : Scanner
     + EntradaConsola()
@@ -193,6 +205,7 @@ package "diseno" {
     + leerDecimal(mensaje : String) : double
     + leerEnum(mensaje : String, tipo : Class<E>) : E
     + leerOpcion(mensaje : String, minimo : int, maximo : int) : int
+    - listarConstantes(tipo : Class<E>) : String
     + close() : void
   }
 
@@ -205,84 +218,55 @@ package "diseno" {
     - solicitarDatosComunes() : DatosComunes
   }
 
-  class DatosComunes <<inner>> {
-    - identificador : String
-    - marca : String
-    - modelo : String
-    - anio : int
-    - color : String
-    - condicion : CondicionVehiculo
-    - kilometraje : int
-    - valorComercial : double
-    - DatosComunes(identificador : String, marca : String, modelo : String, anio : int, color : String, condicion : CondicionVehiculo, kilometraje : int, valorComercial : double)
+  class Main {
+    - servicio : ConcesionariaService
+    - entrada : EntradaConsola
+    - formularios : FormulariosVehiculo
+    - Main(servicio : ConcesionariaService, entrada : EntradaConsola)
+    + {static} main(args : String[]) : void
+    - ejecutar() : void
+    - mostrarMenu() : void
+    - procesarOpcion(opcion : int) : boolean
+    - darDeAlta() : void
+    - solicitarVehiculo(tipo : int) : Vehiculo
+    - modificar() : void
+    - consultar() : void
+    - bajar() : void
+    - mostrarListado(vehiculos : List<Vehiculo>) : void
   }
 }
 
-Vehiculo ..|> Cotizable
-Auto --|> Vehiculo
-Camioneta --|> Vehiculo
-Motocicleta --|> Vehiculo
+' Relaciones de herencia
+Vehiculo <|-- Auto
+Vehiculo <|-- Camioneta
+Vehiculo <|-- Motocicleta
+Cotizable <|.. Vehiculo
+Exception <|-- DatoVehiculoInvalidoException
+Exception <|-- VehiculoDuplicadoException
+Exception <|-- VehiculoNoEncontradoException
+RepositorioGenerico <|.. RepositorioVehiculos
 
-Vehiculo --> CondicionVehiculo : condicion
-Vehiculo --> TipoVehiculo : getTipoVehiculo()
-Auto --> Carroceria : carroceria
-Camioneta --> Carroceria : carroceria
-Motocicleta --> EstiloMotocicleta : estilo
+' Composicion / agregacion
+ConcesionariaService *-- "1" RepositorioGenerico : repositorio
+ConcesionariaService *-- "0..*" Vehiculo : stock
+ConcesionariaService *-- "0..*" Vehiculo : indice
+FormulariosVehiculo *-- "1" EntradaConsola : entrada
+Main *-- "1" ConcesionariaService : servicio
+Main *-- "1" EntradaConsola : entrada
+Main *-- "1" FormulariosVehiculo : formularios
 
-Vehiculo ..> DatoVehiculoInvalidoException : lanza
-Auto ..> DatoVehiculoInvalidoException : lanza
-Camioneta ..> DatoVehiculoInvalidoException : lanza
-Motocicleta ..> DatoVehiculoInvalidoException : lanza
-
-RepositorioVehiculos ..|> RepositorioGenerico
-RepositorioVehiculos --> Vehiculo : administra
-RepositorioVehiculos --> VehiculoCodec : usa
-RepositorioVehiculos ..> VehiculoDuplicadoException : lanza
-RepositorioVehiculos ..> VehiculoNoEncontradoException : lanza
-VehiculoCodec ..> IOException : lanza
-
-ConcesionariaService --> RepositorioGenerico : repositorio
-ConcesionariaService --> Vehiculo : gestiona
-
-Main --> ConcesionariaService : servicio
-Main --> EntradaConsola : entrada
-Main --> FormulariosVehiculo : formularios
-Main --> CondicionVehiculo : filtra
-Main --> TipoVehiculo : filtra
-Main ..> Vehiculo : muestra por consola
-FormulariosVehiculo --> EntradaConsola : entrada
-FormulariosVehiculo --> Auto : construye
-FormulariosVehiculo --> Camioneta : construye
-FormulariosVehiculo --> Motocicleta : construye
-FormulariosVehiculo *-- DatosComunes : clase interna privada
-EntradaConsola ..|> AutoCloseable : java.lang
-EntradaConsola ..> DatoVehiculoInvalidoException : lanza
-FormulariosVehiculo ..> DatoVehiculoInvalidoException : lanza
-Main ..> DatoVehiculoInvalidoException : traduce
-Main ..> VehiculoDuplicadoException : traduce
-Main ..> VehiculoNoEncontradoException : traduce
-
-note right of Vehiculo
-  identificador es inmutable (final, sin setter).
-  Invariantes validadas en constructor y setters.
-  equals, hashCode y toString sobrescritos.
-end note
-
-note right of RepositorioVehiculos
-  Ruta por defecto: data/stock.txt.
-  Formato de texto documentado en VehiculoCodec.
-  Recursos cerrados con try-with-resources.
-end note
-
-note right of Main
-  Único punto con Scanner, System.out y System.err.
-  Menú: alta, modificación, consultas/filtros, baja y salir.
-  Carga el stock al iniciar; si falla, se detiene.
-end note
-
-note right of FormulariosVehiculo
-  DatosComunes es una clase interna privada
-  que evita repetir las ocho lecturas compartidas.
-end note
+' Dependencias
+VehiculoCodec ..> Auto
+VehiculoCodec ..> Camioneta
+VehiculoCodec ..> Motocicleta
+RepositorioVehiculos ..> VehiculoCodec
+ConcesionariaService ..> CondicionVehiculo
+ConcesionariaService ..> TipoVehiculo
+FormulariosVehiculo ..> Carroceria
+FormulariosVehiculo ..> EstiloMotocicleta
+FormulariosVehiculo ..> CondicionVehiculo
+Main ..> Vehiculo
+Main ..> CondicionVehiculo
+Main ..> TipoVehiculo
 
 @enduml

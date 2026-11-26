@@ -1,20 +1,25 @@
 package diseno;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import negocio.excepciones.DatoVehiculoInvalidoException;
 import negocio.excepciones.VehiculoDuplicadoException;
 import negocio.excepciones.VehiculoNoEncontradoException;
+import negocio.modelo.CondicionVehiculo;
+import negocio.modelo.TipoVehiculo;
 import negocio.modelo.Vehiculo;
 import negocio.servicio.ConcesionariaService;
 
 /**
  * Punto de entrada de la aplicación de consola.
  *
- * <p>Expone un menú con tres operaciones: dar de alta un vehículo, modificarlo
- * y salir. Toda decisión de negocio se delega en {@link ConcesionariaService};
+ * <p>Expone un menú con las operaciones: dar de alta un vehículo, modificarlo,
+ * consultar/listar el stock con filtros y dar de baja, hasta que el usuario
+ * elige salir. Toda decisión de negocio se delega en {@link ConcesionariaService};
  * esta clase solo muestra opciones, traduce excepciones a mensajes y mantiene
- * la navegación continua hasta que el usuario elige salir.</p>
+ * la navegación continua.</p>
  */
 public final class Main {
 
@@ -66,7 +71,7 @@ public final class Main {
         while (continuar) {
             mostrarMenu();
             try {
-                int opcion = entrada.leerOpcion("Opción: ", 1, 3);
+                int opcion = entrada.leerOpcion("Opción: ", 1, 5);
                 continuar = procesarOpcion(opcion);
             } catch (DatoVehiculoInvalidoException causa) {
                 System.out.println("Error: " + causa.getMessage());
@@ -83,7 +88,9 @@ public final class Main {
         System.out.println("=== Concesionaria Multimarcas ===");
         System.out.println("1. Dar de alta un vehículo");
         System.out.println("2. Modificar un vehículo");
-        System.out.println("3. Salir");
+        System.out.println("3. Consultar / listar stock");
+        System.out.println("4. Dar de baja un vehículo");
+        System.out.println("5. Salir");
     }
 
     /**
@@ -101,6 +108,12 @@ public final class Main {
                 modificar();
                 return true;
             case 3:
+                consultar();
+                return true;
+            case 4:
+                bajar();
+                return true;
+            case 5:
                 return false;
             default:
                 throw new IllegalStateException("Opción no contemplada: " + opcion);
@@ -170,6 +183,104 @@ public final class Main {
             System.out.println("No se pudo modificar: " + causa.getMessage());
         } catch (IOException causa) {
             System.err.println("Error de persistencia: " + causa.getMessage());
+        }
+    }
+
+    /**
+     * Submenú de consultas y listados del stock.
+     */
+    private void consultar() {
+        boolean volver = false;
+        while (!volver) {
+            System.out.println();
+            System.out.println("--- Consultas ---");
+            System.out.println("1. Listar todo el stock");
+            System.out.println("2. Filtrar por marca");
+            System.out.println("3. Filtrar por condición (NUEVO/USADO)");
+            System.out.println("4. Filtrar por tipo de vehículo");
+            System.out.println("5. Filtrar por rango de precios");
+            System.out.println("6. Volver");
+            try {
+                int opcion = entrada.leerOpcion("Opción: ", 1, 6);
+                switch (opcion) {
+                    case 1:
+                        mostrarListado(servicio.listarTodos());
+                        break;
+                    case 2: {
+                        String marca = entrada.leerTexto("Marca: ");
+                        mostrarListado(servicio.filtrarPorMarca(marca));
+                        break;
+                    }
+                    case 3: {
+                        CondicionVehiculo condicion = entrada.leerEnum(
+                                "Condición (NUEVO/USADO): ", CondicionVehiculo.class);
+                        mostrarListado(servicio.filtrarPorCondicion(condicion));
+                        break;
+                    }
+                    case 4: {
+                        TipoVehiculo tipo = entrada.leerEnum(
+                                "Tipo (AUTO/CAMIONETA/MOTOCICLETA): ", TipoVehiculo.class);
+                        mostrarListado(servicio.filtrarPorTipo(tipo));
+                        break;
+                    }
+                    case 5: {
+                        double minimo = entrada.leerDecimal("Precio mínimo: ");
+                        double maximo = entrada.leerDecimal("Precio máximo: ");
+                        mostrarListado(servicio.filtrarPorRangoPrecio(minimo, maximo));
+                        break;
+                    }
+                    case 6:
+                        volver = true;
+                        break;
+                    default:
+                        throw new IllegalStateException("Opción no contemplada: " + opcion);
+                }
+            } catch (DatoVehiculoInvalidoException causa) {
+                System.out.println("Entrada inválida: " + causa.getMessage());
+            }
+        }
+    }
+
+    /**
+     * Da de baja un vehículo por identificador, con confirmación previa.
+     */
+    private void bajar() {
+        try {
+            String id = entrada.leerTexto("Identificador del vehículo a dar de baja: ");
+            String confirmacion;
+            try {
+                confirmacion = entrada.leerTexto("¿Confirmar baja? (s/n): ");
+            } catch (DatoVehiculoInvalidoException causa) {
+                confirmacion = "n";
+            }
+            if (!confirmacion.equalsIgnoreCase("s") && !confirmacion.equalsIgnoreCase("si")) {
+                System.out.println("Baja cancelada.");
+                return;
+            }
+            servicio.baja(id);
+            System.out.println("Vehículo dado de baja: " + id);
+        } catch (VehiculoNoEncontradoException causa) {
+            System.out.println("No se pudo dar de baja: " + causa.getMessage());
+        } catch (DatoVehiculoInvalidoException causa) {
+            System.out.println("Entrada inválida: " + causa.getMessage());
+        } catch (IOException causa) {
+            System.err.println("Error de persistencia: " + causa.getMessage());
+        }
+    }
+
+    /**
+     * Imprime un listado formateado de vehículos usando su {@code toString()}.
+     *
+     * @param vehiculos lista a mostrar
+     */
+    private void mostrarListado(List<Vehiculo> vehiculos) {
+        if (vehiculos == null || vehiculos.isEmpty()) {
+            System.out.println("Sin resultados.");
+            return;
+        }
+        System.out.println("--- Listado (" + vehiculos.size() + " unidad/es) ---");
+        for (Vehiculo vehiculo : vehiculos) {
+            System.out.println(vehiculo);
         }
     }
 }

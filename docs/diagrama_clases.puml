@@ -2,128 +2,220 @@
 skinparam classAttributeIconSize 0
 skinparam defaultFontName Monospaced
 
-title Jerarquía de Vehículos - Concesionaria Multimarcas
+title Diagrama de Clases - Sistema de Gestión de Concesionaria Multimarcas
 
-interface Cotizable {
-  + calcularValorComercial() : double
+package "negocio.modelo" {
+
+  interface Cotizable {
+    + calcularValorComercial() : double
+  }
+
+  abstract class Vehiculo {
+    - identificador : String {final}
+    - marca : String
+    - modelo : String
+    - anio : int
+    - color : String
+    - condicion : CondicionVehiculo
+    - kilometraje : int
+    - valorComercial : double
+    + getIdentificador() : String
+    + getMarca() : String
+    + setMarca(marca : String) : void
+    + getModelo() : String
+    + setModelo(modelo : String) : void
+    + getAnio() : int
+    + setAnio(anio : int) : void
+    + getColor() : String
+    + setColor(color : String) : void
+    + getCondicion() : CondicionVehiculo
+    + setCondicion(condicion : CondicionVehiculo) : void
+    + getKilometraje() : int
+    + setKilometraje(kilometraje : int) : void
+    + getValorComercial() : double
+    + setValorComercial(valorComercial : double) : void
+    + {abstract} getTipoVehiculo() : TipoVehiculo
+    + calcularValorComercial() : double
+  }
+
+  class Auto {
+    - carroceria : Carroceria
+    + getCarroceria() : Carroceria
+    + setCarroceria(carroceria : Carroceria) : void
+    + getTipoVehiculo() : TipoVehiculo
+  }
+
+  class Camioneta {
+    - carroceria : Carroceria
+    + getCarroceria() : Carroceria
+    + setCarroceria(carroceria : Carroceria) : void
+    + getTipoVehiculo() : TipoVehiculo
+  }
+
+  class Motocicleta {
+    - estilo : EstiloMotocicleta
+    + getEstilo() : EstiloMotocicleta
+    + setEstilo(estilo : EstiloMotocicleta) : void
+    + getTipoVehiculo() : TipoVehiculo
+  }
+
+  enum TipoVehiculo {
+    AUTO
+    CAMIONETA
+    MOTOCICLETA
+  }
+
+  enum CondicionVehiculo {
+    NUEVO
+    USADO
+  }
+
+  enum Carroceria {
+    SEDAN
+    HATCHBACK
+    SUV
+    COUPE
+    PICKUP
+    FURGON
+  }
+
+  enum EstiloMotocicleta {
+    DEPORTIVA
+    CRUISER
+    SCOOTER
+    ENDURO
+    NAKED
+    TOURING
+  }
 }
 
-abstract class Vehiculo {
-  - identificador : String {final}
-  - marca : String
-  - modelo : String
-  - anio : int
-  - color : String
-  - condicion : CondicionVehiculo
-  - kilometraje : int
-  - valorComercial : double
-  + getIdentificador() : String
-  + getMarca() : String
-  + setMarca(marca : String) : void
-  + getModelo() : String
-  + setModelo(modelo : String) : void
-  + getAnio() : int
-  + setAnio(anio : int) : void
-  + getColor() : String
-  + setColor(color : String) : void
-  + getCondicion() : CondicionVehiculo
-  + setCondicion(condicion : CondicionVehiculo) : void
-  + getKilometraje() : int
-  + setKilometraje(kilometraje : int) : void
-  + getValorComercial() : double
-  + setValorComercial(valorComercial : double) : void
-  + {abstract} getTipoVehiculo() : TipoVehiculo
-  + calcularValorComercial() : double
+package "negocio.excepciones" {
+
+  class DatoVehiculoInvalidoException <<Exception>> {
+    + DatoVehiculoInvalidoException(mensaje : String)
+    + DatoVehiculoInvalidoException(mensaje : String, causa : Throwable)
+  }
+
+  class VehiculoNoEncontradoException <<Exception>> {
+    + VehiculoNoEncontradoException(mensaje : String)
+    + VehiculoNoEncontradoException(mensaje : String, causa : Throwable)
+  }
+
+  class VehiculoDuplicadoException <<Exception>> {
+    + VehiculoDuplicadoException(mensaje : String)
+    + VehiculoDuplicadoException(mensaje : String, causa : Throwable)
+  }
 }
 
-class Auto {
-  - carroceria : Carroceria
-  + getCarroceria() : Carroceria
-  + setCarroceria(carroceria : Carroceria) : void
-  + getTipoVehiculo() : TipoVehiculo
+package "negocio.persistencia" {
+
+  interface "RepositorioGenerico<T, ID>" as RepositorioGenerico {
+    + guardar(entidad : T) : void
+    + buscarPorId(id : ID) : T
+    + listarTodos() : List<T>
+    + eliminar(id : ID) : void
+  }
+
+  class RepositorioVehiculos {
+    - archivo : Path
+    - {static} RUTA_POR_DEFECTO : Path {final}
+    + RepositorioVehiculos()
+    + RepositorioVehiculos(archivo : Path)
+    + getArchivo() : Path
+    + guardar(entidad : Vehiculo) : void
+    + buscarPorId(id : String) : Vehiculo
+    + listarTodos() : List<Vehiculo>
+    + eliminar(id : String) : void
+    - leerTodos() : List<Vehiculo>
+    - escribirTodos(vehiculos : List<Vehiculo>) : void
+  }
+
+  class VehiculoCodec <<package-private>> {
+    - {static} SEPARADOR : char {final}
+    - {static} ESCAPE : char {final}
+    - {static} CANTIDAD_CAMPOS : int {final}
+    ~ {static} codificar(vehiculo : Vehiculo) : String
+    ~ {static} decodificar(registro : String) : Vehiculo
+    - {static} dividirCampos(registro : String) : String[]
+    - {static} desescapar(campo : String) : String
+    - {static} parsearEntero(campo : String, nombre : String) : int
+    - {static} parsearDecimal(campo : String, nombre : String) : double
+    - {static} parsearEnum(tipo : Class<E>, campo : String, nombre : String) : E
+  }
 }
 
-class Camioneta {
-  - carroceria : Carroceria
-  + getCarroceria() : Carroceria
-  + setCarroceria(carroceria : Carroceria) : void
-  + getTipoVehiculo() : TipoVehiculo
+package "negocio.servicio" {
+
+  class ConcesionariaService {
+    - repositorio : RepositorioGenerico<Vehiculo, String>
+    - stock : List<Vehiculo>
+    - indice : Map<String, Vehiculo>
+    + ConcesionariaService()
+    + ConcesionariaService(repositorio : RepositorioGenerico<Vehiculo, String>)
+    + cargar() : void
+    + recargar() : void
+    + alta(vehiculo : Vehiculo) : void
+    + baja(id : String) : void
+    + buscarPorId(id : String) : Vehiculo
+    + listarTodos() : List<Vehiculo>
+    + modificarValorComercial(id : String, nuevoValor : double) : void
+    + modificarKilometraje(id : String, nuevoKm : int) : void
+    + filtrarPorMarca(marca : String) : List<Vehiculo>
+    + filtrarPorCondicion(condicion : CondicionVehiculo) : List<Vehiculo>
+    + filtrarPorTipo(tipo : TipoVehiculo) : List<Vehiculo>
+    + filtrarPorRangoPrecio(minimo : double, maximo : double) : List<Vehiculo>
+  }
 }
 
-class Motocicleta {
-  - estilo : EstiloMotocicleta
-  + getEstilo() : EstiloMotocicleta
-  + setEstilo(estilo : EstiloMotocicleta) : void
-  + getTipoVehiculo() : TipoVehiculo
-}
+package "diseno" {
 
-enum TipoVehiculo {
-  AUTO
-  CAMIONETA
-  MOTOCICLETA
-}
+  class Main {
+    - servicio : ConcesionariaService
+    - entrada : EntradaConsola
+    - formularios : FormulariosVehiculo
+    + {static} main(args : String[]) : void
+    - ejecutar() : void
+    - mostrarMenu() : void
+    - procesarOpcion(opcion : int) : boolean
+    - darDeAlta() : void
+    - solicitarVehiculo(tipo : int) : Vehiculo
+    - modificar() : void
+    - consultar() : void
+    - bajar() : void
+    - mostrarListado(vehiculos : List<Vehiculo>) : void
+  }
 
-enum CondicionVehiculo {
-  NUEVO
-  USADO
-}
+  class EntradaConsola {
+    - lector : Scanner
+    + EntradaConsola()
+    + leerTexto(mensaje : String) : String
+    + leerEntero(mensaje : String) : int
+    + leerDecimal(mensaje : String) : double
+    + leerEnum(mensaje : String, tipo : Class<E>) : E
+    + leerOpcion(mensaje : String, minimo : int, maximo : int) : int
+    + close() : void
+  }
 
-enum Carroceria {
-  SEDAN
-  HATCHBACK
-  SUV
-  COUPE
-  PICKUP
-  FURGON
-}
+  class FormulariosVehiculo {
+    - entrada : EntradaConsola
+    + FormulariosVehiculo(entrada : EntradaConsola)
+    + solicitarAuto() : Vehiculo
+    + solicitarCamioneta() : Vehiculo
+    + solicitarMotocicleta() : Vehiculo
+    - solicitarDatosComunes() : DatosComunes
+  }
 
-enum EstiloMotocicleta {
-  DEPORTIVA
-  CRUISER
-  SCOOTER
-  ENDURO
-  NAKED
-  TOURING
-}
-
-class DatoVehiculoInvalidoException <<Exception>> {
-  + DatoVehiculoInvalidoException(mensaje : String)
-  + DatoVehiculoInvalidoException(mensaje : String, causa : Throwable)
-}
-
-class VehiculoNoEncontradoException <<Exception>> {
-  + VehiculoNoEncontradoException(mensaje : String)
-  + VehiculoNoEncontradoException(mensaje : String, causa : Throwable)
-}
-
-class VehiculoDuplicadoException <<Exception>> {
-  + VehiculoDuplicadoException(mensaje : String)
-  + VehiculoDuplicadoException(mensaje : String, causa : Throwable)
-}
-
-interface RepositorioGenerico<T, ID> {
-  + guardar(entidad : T) : void
-  + buscarPorId(id : ID) : T
-  + listarTodos() : List<T>
-  + eliminar(id : ID) : void
-}
-
-class RepositorioVehiculos {
-  - archivo : Path
-  + RepositorioVehiculos()
-  + RepositorioVehiculos(archivo : Path)
-  + getArchivo() : Path
-  + guardar(entidad : Vehiculo) : void
-  + buscarPorId(id : String) : Vehiculo
-  + listarTodos() : List<Vehiculo>
-  + eliminar(id : String) : void
-  - leerTodos() : List<Vehiculo>
-  - escribirTodos(vehiculos : List<Vehiculo>) : void
-}
-
-class VehiculoCodec {
-  + {static} codificar(vehiculo : Vehiculo) : String
-  + {static} decodificar(registro : String) : Vehiculo
+  class DatosComunes <<inner>> {
+    - identificador : String
+    - marca : String
+    - modelo : String
+    - anio : int
+    - color : String
+    - condicion : CondicionVehiculo
+    - kilometraje : int
+    - valorComercial : double
+    - DatosComunes(identificador : String, marca : String, modelo : String, anio : int, color : String, condicion : CondicionVehiculo, kilometraje : int, valorComercial : double)
+  }
 }
 
 Vehiculo ..|> Cotizable
@@ -149,108 +241,48 @@ RepositorioVehiculos ..> VehiculoDuplicadoException : lanza
 RepositorioVehiculos ..> VehiculoNoEncontradoException : lanza
 VehiculoCodec ..> IOException : lanza
 
-note right of Vehiculo
-  identificador es inmutable (final, sin setter).
-  Invariantes validadas en constructor y setters.
-  equals, hashCode y toString sobrescritos (Issue #4).
-end note
-
-note right of DatoVehiculoInvalidoException
-  Dato inválido en el modelo.
-end note
-
-note right of VehiculoNoEncontradoException
-  Repositorio y servicio: búsqueda sin resultados.
-end note
-
-note right of VehiculoDuplicadoException
-  Repositorio y servicio: alta con identidad repetida.
-end note
-
-note right of RepositorioVehiculos
-  Ruta por defecto: data/stock.txt.
-  Formato de texto documentado en VehiculoCodec.
-end note
-
-class ConcesionariaService {
-  - repositorio : RepositorioGenerico<Vehiculo, String>
-  - stock : List<Vehiculo>
-  - indice : Map<String, Vehiculo>
-  + ConcesionariaService()
-  + ConcesionariaService(repositorio : RepositorioGenerico<Vehiculo, String>)
-  + cargar() : void
-  + recargar() : void
-  + alta(vehiculo : Vehiculo) : void
-  + baja(id : String) : void
-  + buscarPorId(id : String) : Vehiculo
-  + listarTodos() : List<Vehiculo>
-  + modificarValorComercial(id : String, nuevoValor : double) : void
-  + modificarKilometraje(id : String, nuevoKm : int) : void
-  + filtrarPorMarca(marca : String) : List<Vehiculo>
-  + filtrarPorCondicion(condicion : CondicionVehiculo) : List<Vehiculo>
-  + filtrarPorTipo(tipo : TipoVehiculo) : List<Vehiculo>
-  + filtrarPorRangoPrecio(minimo : double, maximo : double) : List<Vehiculo>
-}
-
-interface RepositorioGenerico {
-  + guardar(entidad : T) : void
-  + buscarPorId(id : ID) : T
-  + listarTodos() : List<T>
-  + eliminar(id : ID) : void
-}
-
 ConcesionariaService --> RepositorioGenerico : repositorio
 ConcesionariaService --> Vehiculo : gestiona
-
-class Main {
-  - servicio : ConcesionariaService
-  - entrada : EntradaConsola
-  - formularios : FormulariosVehiculo
-  + {static} main(args : String[]) : void
-  - ejecutar() : void
-  - mostrarMenu() : void
-  - procesarOpcion(opcion : int) : boolean
-  - darDeAlta() : void
-  - solicitarVehiculo(tipo : int) : Vehiculo
-  - modificar() : void
-}
-
-class EntradaConsola {
-  - lector : Scanner
-  + EntradaConsola()
-  + leerTexto(mensaje : String) : String
-  + leerEntero(mensaje : String) : int
-  + leerDecimal(mensaje : String) : double
-  + leerEnum(mensaje : String, tipo : Class<E>) : E
-  + leerOpcion(mensaje : String, minimo : int, maximo : int) : int
-  + close() : void
-}
-
-class FormulariosVehiculo {
-  - entrada : EntradaConsola
-  + FormulariosVehiculo(entrada : EntradaConsola)
-  + solicitarAuto() : Vehiculo
-  + solicitarCamioneta() : Vehiculo
-  + solicitarMotocicleta() : Vehiculo
-  - solicitarDatosComunes() : DatosComunes
-}
 
 Main --> ConcesionariaService : servicio
 Main --> EntradaConsola : entrada
 Main --> FormulariosVehiculo : formularios
+Main --> CondicionVehiculo : filtra
+Main --> TipoVehiculo : filtra
+Main ..> Vehiculo : muestra por consola
 FormulariosVehiculo --> EntradaConsola : entrada
 FormulariosVehiculo --> Auto : construye
 FormulariosVehiculo --> Camioneta : construye
 FormulariosVehiculo --> Motocicleta : construye
+FormulariosVehiculo *-- DatosComunes : clase interna privada
+EntradaConsola ..|> AutoCloseable : java.lang
 EntradaConsola ..> DatoVehiculoInvalidoException : lanza
 FormulariosVehiculo ..> DatoVehiculoInvalidoException : lanza
 Main ..> DatoVehiculoInvalidoException : traduce
 Main ..> VehiculoDuplicadoException : traduce
 Main ..> VehiculoNoEncontradoException : traduce
 
+note right of Vehiculo
+  identificador es inmutable (final, sin setter).
+  Invariantes validadas en constructor y setters.
+  equals, hashCode y toString sobrescritos.
+end note
+
+note right of RepositorioVehiculos
+  Ruta por defecto: data/stock.txt.
+  Formato de texto documentado en VehiculoCodec.
+  Recursos cerrados con try-with-resources.
+end note
+
 note right of Main
   Único punto con Scanner, System.out y System.err.
+  Menú: alta, modificación, consultas/filtros, baja y salir.
   Carga el stock al iniciar; si falla, se detiene.
+end note
+
+note right of FormulariosVehiculo
+  DatosComunes es una clase interna privada
+  que evita repetir las ocho lecturas compartidas.
 end note
 
 @enduml

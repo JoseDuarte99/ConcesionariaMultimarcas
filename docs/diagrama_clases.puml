@@ -202,4 +202,55 @@ interface RepositorioGenerico {
 ConcesionariaService --> RepositorioGenerico : repositorio
 ConcesionariaService --> Vehiculo : gestiona
 
+class Main {
+  - servicio : ConcesionariaService
+  - entrada : EntradaConsola
+  - formularios : FormulariosVehiculo
+  + {static} main(args : String[]) : void
+  - ejecutar() : void
+  - mostrarMenu() : void
+  - procesarOpcion(opcion : int) : boolean
+  - darDeAlta() : void
+  - solicitarVehiculo(tipo : int) : Vehiculo
+  - modificar() : void
+}
+
+class EntradaConsola {
+  - lector : Scanner
+  + EntradaConsola()
+  + leerTexto(mensaje : String) : String
+  + leerEntero(mensaje : String) : int
+  + leerDecimal(mensaje : String) : double
+  + leerEnum(mensaje : String, tipo : Class<E>) : E
+  + leerOpcion(mensaje : String, minimo : int, maximo : int) : int
+  + close() : void
+}
+
+class FormulariosVehiculo {
+  - entrada : EntradaConsola
+  + FormulariosVehiculo(entrada : EntradaConsola)
+  + solicitarAuto() : Vehiculo
+  + solicitarCamioneta() : Vehiculo
+  + solicitarMotocicleta() : Vehiculo
+  - solicitarDatosComunes() : DatosComunes
+}
+
+Main --> ConcesionariaService : servicio
+Main --> EntradaConsola : entrada
+Main --> FormulariosVehiculo : formularios
+FormulariosVehiculo --> EntradaConsola : entrada
+FormulariosVehiculo --> Auto : construye
+FormulariosVehiculo --> Camioneta : construye
+FormulariosVehiculo --> Motocicleta : construye
+EntradaConsola ..> DatoVehiculoInvalidoException : lanza
+FormulariosVehiculo ..> DatoVehiculoInvalidoException : lanza
+Main ..> DatoVehiculoInvalidoException : traduce
+Main ..> VehiculoDuplicadoException : traduce
+Main ..> VehiculoNoEncontradoException : traduce
+
+note right of Main
+  Único punto con Scanner, System.out y System.err.
+  Carga el stock al iniciar; si falla, se detiene.
+end note
+
 @enduml

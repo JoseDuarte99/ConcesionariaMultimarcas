@@ -60,6 +60,14 @@ public class RepositorioVehiculos implements RepositorioGenerico<Vehiculo, Strin
         return archivo;
     }
 
+    /**
+     * Incorpora un vehículo al archivo, verificando antes que su identificador
+     * no esté repetido.
+     *
+     * @param entidad vehículo a guardar; no puede ser nulo
+     * @throws IOException                  si falla la lectura o escritura del archivo
+     * @throws VehiculoDuplicadoException   si ya existe una unidad con el mismo identificador
+     */
     @Override
     public void guardar(Vehiculo entidad) throws IOException, VehiculoDuplicadoException {
         if (entidad == null) {
@@ -77,6 +85,14 @@ public class RepositorioVehiculos implements RepositorioGenerico<Vehiculo, Strin
         escribirTodos(vehiculos);
     }
 
+    /**
+     * Busca un vehículo recorriendo los registros del archivo.
+     *
+     * @param id identificador buscado
+     * @return vehículo encontrado
+     * @throws IOException                   si falla la lectura o algún registro está corrupto
+     * @throws VehiculoNoEncontradoException si no existe una unidad con ese identificador
+     */
     @Override
     public Vehiculo buscarPorId(String id) throws IOException, VehiculoNoEncontradoException {
         for (Vehiculo vehiculo : leerTodos()) {
@@ -88,11 +104,24 @@ public class RepositorioVehiculos implements RepositorioGenerico<Vehiculo, Strin
                 "No se encontró un vehículo con el identificador " + id + ".");
     }
 
+    /**
+     * Devuelve todas las unidades persistidas, reconstruidas desde el archivo.
+     *
+     * @return lista nueva con los vehículos; vacía si el archivo no existe
+     * @throws IOException si falla la lectura o algún registro está corrupto
+     */
     @Override
     public List<Vehiculo> listarTodos() throws IOException {
         return leerTodos();
     }
 
+    /**
+     * Elimina del archivo la unidad identificada y reescribe el resto.
+     *
+     * @param id identificador de la unidad a eliminar
+     * @throws IOException                   si falla la lectura o escritura del archivo
+     * @throws VehiculoNoEncontradoException si no existe una unidad con ese identificador
+     */
     @Override
     public void eliminar(String id) throws IOException, VehiculoNoEncontradoException {
         List<Vehiculo> vehiculos = leerTodos();

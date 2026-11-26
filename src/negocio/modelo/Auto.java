@@ -56,6 +56,17 @@ public class Auto extends Vehiculo {
     }
 
     /**
+     * Devuelve la ficha técnica completa del automóvil.
+     *
+     * @return representación legible del automóvil
+     */
+    @Override
+    public String toString() {
+        return getTipoVehiculo() + "{" + descripcionComun()
+                + ", carroceria=" + carroceria + "}";
+    }
+
+    /**
      * Devuelve el tipo de vehículo correspondiente a esta subclase.
      *
      * @return {@link TipoVehiculo#AUTO}

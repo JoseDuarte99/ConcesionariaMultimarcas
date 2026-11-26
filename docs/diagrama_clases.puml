@@ -120,7 +120,7 @@ Motocicleta ..> DatoVehiculoInvalidoException : lanza
 note right of Vehiculo
   identificador es inmutable (final, sin setter).
   Invariantes validadas en constructor y setters.
-  equals / hashCode / toString en #4.
+  equals, hashCode y toString sobrescritos (Issue #4).
 end note
 
 note right of DatoVehiculoInvalidoException

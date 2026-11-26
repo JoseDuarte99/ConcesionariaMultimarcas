@@ -1,5 +1,7 @@
 package negocio.modelo;
 
+import java.util.Objects;
+
 import negocio.excepciones.DatoVehiculoInvalidoException;
 
 /**
@@ -225,6 +227,42 @@ public abstract class Vehiculo implements Cotizable {
     }
 
     /**
+     * Compara dos vehículos por su identidad de negocio.
+     *
+     * <p>Dos vehículos son iguales si y solo si son del mismo tipo concreto y
+     * comparten el mismo {@code identificador} (patente o código interno). La
+     * comparación es estricta por clase: un {@code Auto} y una
+     * {@code Camioneta} con la misma patente no se consideran iguales.</p>
+     *
+     * @param obj objeto a comparar
+     * @return {@code true} si ambos vehículos tienen la misma identidad
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+        Vehiculo otro = (Vehiculo) obj;
+        return Objects.equals(identificador, otro.identificador);
+    }
+
+    /**
+     * Código hash coherente con {@link #equals(Object)}.
+     *
+     * <p>Se basa únicamente en el {@code identificador}, que es la clave de
+     * igualdad.</p>
+     *
+     * @return código hash del vehículo
+     */
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(identificador);
+    }
+
+    /**
      * Tipo de vehículo según la jerarquía concreta.
      *
      * @return constante de {@link TipoVehiculo} correspondiente a la subclase
@@ -243,6 +281,36 @@ public abstract class Vehiculo implements Cotizable {
     @Override
     public double calcularValorComercial() {
         return valorComercial;
+    }
+
+    /**
+     * Arma la descripción común de los atributos compartidos por todas las
+     * subclases, para reutilizarla en {@link #toString()} sin duplicar código.
+     *
+     * @return texto con los campos comunes del vehículo
+     */
+    protected String descripcionComun() {
+        return "identificador=" + identificador
+                + ", marca=" + marca
+                + ", modelo=" + modelo
+                + ", anio=" + anio
+                + ", color=" + color
+                + ", condicion=" + condicion
+                + ", kilometraje=" + kilometraje
+                + ", valorComercial=" + valorComercial;
+    }
+
+    /**
+     * Devuelve la ficha técnica completa del vehículo.
+     *
+     * <p>Incluye todos los atributos comunes y se sobrescribe en cada subclase
+     * para agregar el campo específico (carrocería o estilo).</p>
+     *
+     * @return representación legible del vehículo
+     */
+    @Override
+    public String toString() {
+        return getTipoVehiculo() + "{" + descripcionComun() + "}";
     }
 
     /**

@@ -101,6 +101,31 @@ class VehiculoDuplicadoException <<Exception>> {
   + VehiculoDuplicadoException(mensaje : String, causa : Throwable)
 }
 
+interface RepositorioGenerico<T, ID> {
+  + guardar(entidad : T) : void
+  + buscarPorId(id : ID) : T
+  + listarTodos() : List<T>
+  + eliminar(id : ID) : void
+}
+
+class RepositorioVehiculos {
+  - archivo : Path
+  + RepositorioVehiculos()
+  + RepositorioVehiculos(archivo : Path)
+  + getArchivo() : Path
+  + guardar(entidad : Vehiculo) : void
+  + buscarPorId(id : String) : Vehiculo
+  + listarTodos() : List<Vehiculo>
+  + eliminar(id : String) : void
+  - leerTodos() : List<Vehiculo>
+  - escribirTodos(vehiculos : List<Vehiculo>) : void
+}
+
+class VehiculoCodec {
+  + {static} codificar(vehiculo : Vehiculo) : String
+  + {static} decodificar(registro : String) : Vehiculo
+}
+
 Vehiculo ..|> Cotizable
 Auto --|> Vehiculo
 Camioneta --|> Vehiculo
@@ -117,6 +142,13 @@ Auto ..> DatoVehiculoInvalidoException : lanza
 Camioneta ..> DatoVehiculoInvalidoException : lanza
 Motocicleta ..> DatoVehiculoInvalidoException : lanza
 
+RepositorioVehiculos ..|> RepositorioGenerico
+RepositorioVehiculos --> Vehiculo : administra
+RepositorioVehiculos --> VehiculoCodec : usa
+RepositorioVehiculos ..> VehiculoDuplicadoException : lanza
+RepositorioVehiculos ..> VehiculoNoEncontradoException : lanza
+VehiculoCodec ..> IOException : lanza
+
 note right of Vehiculo
   identificador es inmutable (final, sin setter).
   Invariantes validadas en constructor y setters.
@@ -128,11 +160,16 @@ note right of DatoVehiculoInvalidoException
 end note
 
 note right of VehiculoNoEncontradoException
-  Uso previsto en servicio: búsqueda sin resultados.
+  Repositorio y servicio: búsqueda sin resultados.
 end note
 
 note right of VehiculoDuplicadoException
-  Uso previsto en servicio: alta con identidad repetida.
+  Repositorio y servicio: alta con identidad repetida.
+end note
+
+note right of RepositorioVehiculos
+  Ruta por defecto: data/stock.txt.
+  Formato de texto documentado en VehiculoCodec.
 end note
 
 @enduml
